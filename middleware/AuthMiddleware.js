@@ -33,8 +33,8 @@ const user = (req, res, next) => {
       });
     } else {
 
-
-      req.user_id = decoded.id;
+// console.log(decoded)
+      req.userId = decoded.userId;
       req.email = decoded.email
       req.name = decoded.name
       next();

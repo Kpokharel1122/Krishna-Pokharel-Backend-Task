@@ -59,7 +59,7 @@ module.exports.Login = (loginData) => {
           } else {
             const email = loginData.email;
             const result = await prisma.user.findFirst({
-              select: { password: true, name: true, email: true },
+              select: { password: true,userId:true, name: true, email: true },
               where:{
                 email:loginData.email
               }
@@ -68,13 +68,14 @@ module.exports.Login = (loginData) => {
             bcrypt.compare(
               loginData.password,
               result.password,
-              function (err, result) {
+              function (err, results) {
                 // result == true
-                if (result) {
+                if (results) {
                   const token = jwt.sign(
                     {
                       email: loginData.email,
-                      name: loginData.name,
+                      name: result.name,
+                      userId:result.userId
                     },
                     process.env.SECRET_KEY
                   );

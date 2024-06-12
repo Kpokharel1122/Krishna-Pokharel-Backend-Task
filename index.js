@@ -14,8 +14,9 @@ app.use(
 );
 
 const AuthRoute = require('./routes/AuthRoute')
+const TaskRoute = require('./routes/TaskRoute')
 
-app.use([AuthRoute])
+app.use([AuthRoute,TaskRoute])
 
 app.listen(8000, (err) => {
     if (err) {
