@@ -16,7 +16,7 @@ app.use(
 );
 
 app.get('/',async(req,res)=>{
-  res.sendFile(path. join(__dirname, 'public', 'home.html'))
+  res.sendFile(path. join(__dirname, 'public', 'login.html'))
 })
 app.get('/login',async(req,res)=>{
   res.sendFile(path. join(__dirname, 'public', 'login.html'))
