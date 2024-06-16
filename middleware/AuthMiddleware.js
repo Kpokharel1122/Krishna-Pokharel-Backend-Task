@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
+const logger = require('pino')()
 
 
 function getToken(req) {
@@ -17,6 +18,7 @@ const user = (req, res, next) => {
 
 
   if (!token) {
+    logger.error("Unauthorized Access! Please Login to continue")
     return res.status(403).json({
       message: "Unauthorized Access! Please Login to continue",
       success: false,
@@ -26,15 +28,16 @@ const user = (req, res, next) => {
   // verfiying for token
   jwt.verify(token, process.env.SECRET_KEY ?? '', async function (err, decoded) {
     if (err) {
-      console.log(err)
+      logger.error("Invalid token")
+      logger.error(err)
       return res.status(403).json({
         message: "Invalid Token",
         success: false,
       });
     } else {
 
-
-      req.user_id = decoded.id;
+// console.log(decoded)
+      req.userId = decoded.userId;
       req.email = decoded.email
       req.name = decoded.name
       next();

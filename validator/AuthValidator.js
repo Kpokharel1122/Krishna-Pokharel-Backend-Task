@@ -37,6 +37,22 @@ module.exports.login = (data) => {
       password:"required"
      
     });
+
+    validate.addPostRule(async (provider) => {
+        const datas =await prisma.user.findFirst({
+          select: {
+            email: true,
+          },
+          where: {
+            email: data.email,
+          },
+        });
+    
+        if(!datas){
+            provider.error("email", "custom", "Email doesn't exists. Enter valid email");
+        
+        }
+      });
   
     return validate;
   };

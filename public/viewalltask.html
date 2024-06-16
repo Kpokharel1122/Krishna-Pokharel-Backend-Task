@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        h1 {
+            color: #007BFF;
+            margin-top: 20px;
+        }
+        table {
+            width: 90%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #007BFF;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        button {
+            padding: 5px 10px;
+            margin: 2px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button a {
+            color: white;
+            text-decoration: none;
+        }
+        button a:hover {
+            text-decoration: underline;
+        }
+        .actions button {
+            margin: 2px 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Data List</h1>
+    <button><a href="/addtask.html">Add Task</a></button>
+    <table id="dataTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Created At</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Description</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+          
+        </tbody>
+    </table>
+
+    <script>
+        const token = localStorage.getItem('token');
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('http://localhost:8000/api/getAllTask', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        const data = result.data;
+                        const tableBody = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
+                        data.forEach(item => {
+                            const row = tableBody.insertRow();
+
+                            row.insertCell(0).textContent = item.id;
+                            row.insertCell(1).textContent = item.title;
+                            row.insertCell(2).textContent = new Date(item.createdAt).toLocaleString();
+                            row.insertCell(3).textContent = item.priority;
+                            row.insertCell(4).textContent = item.status;
+                            row.insertCell(5).textContent = item.description;
+
+                            const actionsCell = row.insertCell(6);
+                            const editButton = document.createElement('button');
+                            editButton.textContent = 'Edit';
+                            editButton.onclick = () => editData(item.id);
+                            actionsCell.appendChild(editButton);
+
+                            const deleteButton = document.createElement('button');
+                            deleteButton.textContent = 'Delete';
+                            deleteButton.onclick = () => deleteData(item.id);
+                            actionsCell.appendChild(deleteButton);
+                        });
+                    } else {
+                        alert('Failed to fetch data');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error fetching data');
+                });
+        });
+
+        function editData(id) {
+            window.location.replace(`http://localhost:8000/edittask?id=${id}`);
+        }
+
+        function deleteData(id) {
+            fetch(`http://localhost:8000/api/deleteTask/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    alert('Data deleted successfully');
+                    location.reload();
+                } else {
+                    alert('Failed to delete data');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error deleting data');
+            });
+        }
+    </script>
+</body>
+</html>
