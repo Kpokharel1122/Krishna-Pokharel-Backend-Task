@@ -1,6 +1,7 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const validate = require("../validator/TaskValidator");
+const logger = require('pino')()
 
 module.exports.postTask = (taskData, userId) => {
   const myPromise = new Promise((resolve, reject) => {
@@ -8,6 +9,8 @@ module.exports.postTask = (taskData, userId) => {
       const validator = validate.postTask(taskData);
       validator.check().then(async (matched) => {
         if (!matched) {
+          logger.error("Error in validation while adding task")
+          logger.error(validator.errors)
           reject({ errors: validator.errors, success: false });
         } else {
           const allData = { ...taskData };
@@ -19,6 +22,8 @@ module.exports.postTask = (taskData, userId) => {
         }
       });
     } catch (err) {
+      logger.error("Error while adding task")
+      logger.error(err)
       reject({ message: "Some problem occured", success: false });
     }
   });
@@ -60,6 +65,7 @@ module.exports.getAllTask = (userId) => {
     try {
       const data = await prisma.task.findMany({
         select: {
+          id:true,
           title: true,
           createdAt: true,
           priority: true,
@@ -107,9 +113,11 @@ module.exports.updateTask = (taskId, userId, taskData) => {
 
         resolve({ message: "Data updated successfully", success: true });
       } else {
+        logger.error("Task not found")
         reject({ message: "Task not found", success: false });
       }
     } catch (err) {
+      // logger.erro
       reject({ message: "Some problem occured" + err, success: false });
     }
   });
@@ -130,19 +138,21 @@ module.exports.deleteTask = (taskId, userId) => {
           userId: userId,
         },
       });
-      if(findTask){
+      if (findTask) {
         const deleteTask = await prisma.task.delete({
-            where:{
-                id:taskId
-            }
-        })
+          where: {
+            id: taskId,
+          },
+        });
 
-        resolve({message:"Task deleted successfully",success:true})
-      }
-      else{
-        reject({message:"Task not found",success:false})
+        resolve({ message: "Task deleted successfully", success: true });
+      } else {
+        logger.error("Task not found")
+        reject({ message: "Task not found", success: false });
       }
     } catch (err) {
+      logger.error("Error while deleting task")
+      logger.error(err)
       reject({ message: "Some problem occured", success: false });
     }
   });
